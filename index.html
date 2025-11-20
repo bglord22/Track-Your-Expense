@@ -1,16 +1,3 @@
-I apologize for the confusion. In my previous reply, I generated the code with the "Reset" button, but I **mistakenly left out the Firestore script** that fixes the crash error. That is why it happened again.
-
-The error `Cannot read properties of undefined (reading 'collection')` happens because your app is trying to talk to a database, but the "dictionary" (SDK) for that database wasn't included in the file I gave you last time.
-
-Here is the **100% corrected code**. It includes:
-
-1.  ✅ **The Missing Fix:** The Firestore SDK script tag is now included in the `<head>`.
-2.  ✅ **The Feature:** The **Reset Data** button is in the dashboard (it asks for confirmation before deleting).
-3.  ✅ **The Android Login Fix:** It uses `signInWithPopup` so it works on your phone.
-
-**Copy and replace your entire `index.html` with this:**
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,11 +34,12 @@ Here is the **100% corrected code**. It includes:
             measurementId: "G-H11W1EN2G6"
         };
 
-        // Initialize Firebase immediately
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const provider = new firebase.auth.GoogleAuthProvider();
-        // We initialize the database variable to prevent "undefined" errors
+        
+        // ⭐ FIX: Initialize DB variable so the old cached code doesn't crash
         const db = firebase.firestore(); 
     </script>
 
@@ -91,8 +79,8 @@ Here is the **100% corrected code**. It includes:
         // --- COMPONENTS ---
 
        // 1. Login Component
-        const Login = () => { 
-            const handleGoogleLogin = async () => { 
+        const Login = () => {
+            const handleGoogleLogin = async () => {
                 try {
                     // Works on Android/PWA
                     await auth.signInWithPopup(provider);
@@ -111,7 +99,12 @@ Here is the **100% corrected code**. It includes:
                             </div>
                         </div>
                         <h1 className="text-3xl font-bold text-slate-800 mb-2">Track Your Expense</h1>
-                        <p className="text-slate-500 mb-8">Secure Account Statement Portal</p>
+                        <p className="text-slate-500 mb-4">Secure Account Statement Portal</p>
+                        
+                        {/* Visual Confirmation - Look for this GREEN BADGE on your phone */}
+                        <div className="mb-6 inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full border border-green-300">
+                            v3.0 (Update Successful)
+                        </div>
                         
                         <button 
                             onClick={handleGoogleLogin}
@@ -123,7 +116,6 @@ Here is the **100% corrected code**. It includes:
 
                         <div className="mt-8 text-xs text-slate-400 border-t pt-4">
                             <p>By signing in, you agree to our Terms of Service.</p>
-                            <p className="mt-2">Commercial & Personal Finance Management</p>
                         </div>
                     </div>
                 </div>
@@ -153,7 +145,6 @@ Here is the **100% corrected code**. It includes:
                             <h2 className="text-2xl font-bold">Welcome, {user.displayName ? user.displayName.split(' ')[0] : 'User'}!</h2>
                             <p className="opacity-90">Let's set up your account profile.</p>
                         </div>
-                        
                         <div className="p-8">
                             {step === 1 && (
                                 <div>
@@ -165,7 +156,6 @@ Here is the **100% corrected code**. It includes:
                                         >
                                             <i className="fa-solid fa-user text-3xl text-slate-400 group-hover:text-indigo-600 mb-3"></i>
                                             <div className="font-bold text-slate-700">Personal Use</div>
-                                            <div className="text-xs text-slate-500 mt-1">Track daily expenses</div>
                                         </button>
                                         <button 
                                             onClick={() => { setDetails({...details, type: 'commercial'}); setStep(2); }}
@@ -173,60 +163,38 @@ Here is the **100% corrected code**. It includes:
                                         >
                                             <i className="fa-solid fa-store text-3xl text-slate-400 group-hover:text-indigo-600 mb-3"></i>
                                             <div className="font-bold text-slate-700">Commercial Use</div>
-                                            <div className="text-xs text-slate-500 mt-1">Shop & Franchise</div>
                                         </button>
                                     </div>
                                 </div>
                             )}
-
                             {step === 2 && (
                                 <form onSubmit={handleSubmit}>
-                                    <h3 className="text-lg font-semibold mb-4 text-slate-700">
-                                        Enter {details.type === 'commercial' ? 'Business' : 'Personal'} Details
-                                    </h3>
-                                    
+                                    <h3 className="text-lg font-semibold mb-4 text-slate-700">Enter Details</h3>
                                     <div className="space-y-4">
                                         <div>
                                             <label className="block text-sm font-medium text-slate-600 mb-1">Full Name</label>
-                                            <input 
-                                                required type="text" className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none"
-                                                value={details.fullName} onChange={e => setDetails({...details, fullName: e.target.value})}
-                                            />
+                                            <input required type="text" className="w-full p-2 border border-slate-300 rounded outline-none" value={details.fullName} onChange={e => setDetails({...details, fullName: e.target.value})} />
                                         </div>
-
                                         {details.type === 'commercial' && (
                                             <>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-600 mb-1">Shop / Business Name</label>
-                                                    <input 
-                                                        required type="text" className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none"
-                                                        value={details.shopName} onChange={e => setDetails({...details, shopName: e.target.value})}
-                                                    />
+                                                    <label className="block text-sm font-medium text-slate-600 mb-1">Shop Name</label>
+                                                    <input required type="text" className="w-full p-2 border border-slate-300 rounded outline-none" value={details.shopName} onChange={e => setDetails({...details, shopName: e.target.value})} />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-600 mb-1">Franchise / GST (Optional)</label>
-                                                    <input 
-                                                        type="text" className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none"
-                                                        value={details.franchiseName} onChange={e => setDetails({...details, franchiseName: e.target.value})}
-                                                    />
+                                                    <label className="block text-sm font-medium text-slate-600 mb-1">GST (Optional)</label>
+                                                    <input type="text" className="w-full p-2 border border-slate-300 rounded outline-none" value={details.franchiseName} onChange={e => setDetails({...details, franchiseName: e.target.value})} />
                                                 </div>
                                             </>
                                         )}
-                                        
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-600 mb-1">Contact Number</label>
-                                            <input 
-                                                required type="tel" className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none"
-                                                value={details.phone} onChange={e => setDetails({...details, phone: e.target.value})}
-                                            />
+                                            <label className="block text-sm font-medium text-slate-600 mb-1">Phone</label>
+                                            <input required type="tel" className="w-full p-2 border border-slate-300 rounded outline-none" value={details.phone} onChange={e => setDetails({...details, phone: e.target.value})} />
                                         </div>
                                     </div>
-
                                     <div className="mt-6 flex gap-3">
                                         <button type="button" onClick={() => setStep(1)} className="px-4 py-2 text-slate-600 hover:underline">Back</button>
-                                        <button type="submit" className="flex-1 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">
-                                            Complete Setup
-                                        </button>
+                                        <button type="submit" className="flex-1 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">Complete Setup</button>
                                     </div>
                                 </form>
                             )}
@@ -240,16 +208,14 @@ Here is the **100% corrected code**. It includes:
         const Dashboard = ({ user, profile, onLogout }) => {
             const [transactions, setTransactions] = useState([]);
             const [isModalOpen, setIsModalOpen] = useState(false);
-            const [modalType, setModalType] = useState('credit'); // 'credit' or 'debit'
+            const [modalType, setModalType] = useState('credit'); 
             const [form, setForm] = useState({ amount: '', partyName: '', mode: 'UPI', remarks: '' });
 
-            // Load Transactions
             useEffect(() => {
                 const saved = localStorage.getItem(`expenses_${user.email}`);
                 if (saved) setTransactions(JSON.parse(saved));
             }, [user.email]);
 
-            // Save Transactions
             useEffect(() => {
                 localStorage.setItem(`expenses_${user.email}`, JSON.stringify(transactions));
             }, [transactions, user.email]);
@@ -280,92 +246,52 @@ Here is the **100% corrected code**. It includes:
                 setForm({ amount: '', partyName: '', mode: 'UPI', remarks: '' });
             };
 
-            // --- NEW FUNCTION: RESET DATA ---
-            const handleResetData = () => {
-                if (window.confirm(`WARNING: Are you sure you want to delete ALL transactions? This cannot be undone.`)) {
+            // --- RESET FEATURE ---
+            const handleReset = () => {
+                if (window.confirm("⚠️ WARNING: This will delete ALL transactions. Are you sure?")) {
                     setTransactions([]);
                     localStorage.removeItem(`expenses_${user.email}`);
-                    alert("All data has been reset.");
+                    alert("Data reset successfully.");
                 }
             };
 
-            // --- PDF GENERATION (With Branding) ---
             const downloadPDF = () => {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-
-                // Header Background
                 doc.setFillColor(79, 70, 229); 
                 doc.rect(0, 0, 210, 45, 'F');
-                
-                // Website Name
                 doc.setTextColor(255, 255, 255);
                 doc.setFontSize(24);
                 doc.text("Track Your Expense", 14, 18);
-
-                // User/Shop Name
                 doc.setFontSize(14);
                 doc.text(profile.shopName || profile.fullName, 14, 28);
-
                 doc.setFontSize(10);
                 doc.setTextColor(200, 200, 255);
                 doc.text("Official Account Statement", 14, 36);
-
-                // Profile Info
                 doc.setTextColor(0, 0, 0);
                 doc.setFontSize(10);
                 doc.text(`Generated by: ${profile.fullName}`, 14, 60);
-                doc.text(`Email: ${user.email}`, 14, 66);
                 doc.text(`Date: ${new Date().toLocaleDateString()}`, 160, 60);
-                if(profile.franchiseName) doc.text(`Franchise/GST: ${profile.franchiseName}`, 14, 72);
-
-                // Summary
-                let summaryY = profile.franchiseName ? 80 : 74;
-                doc.setDrawColor(200);
+                let summaryY = 74;
                 doc.line(14, summaryY, 196, summaryY);
                 doc.text(`Total Credited: ${totals.income.toFixed(2)}`, 14, summaryY + 10);
                 doc.text(`Total Debited: ${totals.expense.toFixed(2)}`, 80, summaryY + 10);
-                doc.setFont("helvetica", "bold");
                 doc.text(`Net Balance: ${balance.toFixed(2)}`, 150, summaryY + 10);
-                doc.setFont("helvetica", "normal");
-
-                // Table
-                const tableColumn = ["Txn ID", "Date", "Details/Party", "Mode", "Credit (+)", "Debit (-)"];
+                
+                const tableColumn = ["Date", "Party Details", "Mode", "Credit", "Debit"];
                 const tableRows = transactions.map(txn => [
-                    txn.id,
                     new Date(txn.date).toLocaleDateString(),
-                    txn.partyName + (txn.remarks ? ` (${txn.remarks})` : ''),
+                    txn.partyName,
                     txn.mode,
-                    txn.type === 'credit' ? txn.amount.toFixed(2) : '-',
-                    txn.type === 'debit' ? txn.amount.toFixed(2) : '-',
+                    txn.type === 'credit' ? txn.amount : '-',
+                    txn.type === 'debit' ? txn.amount : '-',
                 ]);
-
-                doc.autoTable({
-                    head: [tableColumn],
-                    body: tableRows,
-                    startY: summaryY + 20,
-                    theme: 'grid',
-                    headStyles: { fillColor: [79, 70, 229] },
-                    styles: { fontSize: 9 },
-                });
-
-                // Footer
-                const pageCount = doc.internal.getNumberOfPages();
-                for (let i = 1; i <= pageCount; i++) {
-                    doc.setPage(i);
-                    doc.setFontSize(8);
-                    doc.setTextColor(100);
-                    doc.setDrawColor(200);
-                    doc.line(10, 285, 200, 285);
-                    doc.text('Powered by Track Your Expense | Developed by Bhavishya Gupta | bhavishyagupta22@gmail.com', 105, 292, { align: 'center' });
-                }
-
-                doc.save(`${profile.fullName.replace(/\s+/g, '_')}_Statement.pdf`);
+                doc.autoTable({ head: [tableColumn], body: tableRows, startY: summaryY + 20 });
+                doc.save(`${profile.fullName}_Statement.pdf`);
             };
 
             return (
                 <div className="min-h-screen bg-slate-100 flex flex-col">
-                    {/* Navbar */}
                     <nav className="bg-white shadow-sm z-10">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div className="flex justify-between h-16">
@@ -374,11 +300,6 @@ Here is the **100% corrected code**. It includes:
                                     <span className="font-bold text-xl text-slate-800">Track Your Expense</span>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <div className="text-right hidden sm:block">
-                                        <div className="text-sm font-medium text-slate-900">{profile.fullName}</div>
-                                        <div className="text-xs text-slate-500">{profile.type === 'commercial' ? profile.shopName : 'Personal Account'}</div>
-                                    </div>
-                                    <img className="h-8 w-8 rounded-full border" src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}`} alt="" />
                                     <button onClick={onLogout} className="text-slate-400 hover:text-red-500"><i className="fa-solid fa-right-from-bracket text-xl"></i></button>
                                 </div>
                             </div>
@@ -407,9 +328,7 @@ Here is the **100% corrected code**. It includes:
                                 <button onClick={() => { setModalType('credit'); setIsModalOpen(true); }} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-2"><i className="fa-solid fa-plus"></i> Add Money</button>
                                 <button onClick={() => { setModalType('debit'); setIsModalOpen(true); }} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-2"><i className="fa-solid fa-minus"></i> Remove Money</button>
                                 <button onClick={downloadPDF} className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-2"><i className="fa-solid fa-file-pdf"></i> Statement</button>
-                                
-                                {/* NEW RESET BUTTON */}
-                                <button onClick={handleResetData} className="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-2 transition"><i className="fa-solid fa-trash-can"></i> Reset Data</button>
+                                <button onClick={handleReset} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-2"><i className="fa-solid fa-trash"></i> Reset Data</button>
                             </div>
                         </div>
 
@@ -419,19 +338,19 @@ Here is the **100% corrected code**. It includes:
                                     <thead className="bg-slate-50">
                                         <tr>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date / ID</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Party Details</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Party</th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Mode</th>
                                             <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-slate-200">
                                         {transactions.length === 0 ? (
-                                            <tr><td colSpan="4" className="px-6 py-12 text-center text-slate-400"><i className="fa-solid fa-receipt text-4xl mb-2"></i><p>No transactions yet. Click 'Add Money' or 'Remove Money' to begin.</p></td></tr>
+                                            <tr><td colSpan="4" className="px-6 py-12 text-center text-slate-400"><i className="fa-solid fa-receipt text-4xl mb-2"></i><p>No transactions yet.</p></td></tr>
                                         ) : (
                                             transactions.map((txn) => (
                                                 <tr key={txn.id} className="hover:bg-slate-50 transition">
                                                     <td className="px-6 py-4 whitespace-nowrap"><div className="text-sm font-medium text-slate-900">{formatDate(txn.date).split(',')[0]}</div><div className="text-xs text-slate-500 font-mono">{txn.id}</div></td>
-                                                    <td className="px-6 py-4"><div className="text-sm font-medium text-slate-900">{txn.partyName}</div><div className="text-xs text-slate-500">{txn.remarks || 'No remarks'}</div></td>
+                                                    <td className="px-6 py-4"><div className="text-sm font-medium text-slate-900">{txn.partyName}</div><div className="text-xs text-slate-500">{txn.remarks || ''}</div></td>
                                                     <td className="px-6 py-4 whitespace-nowrap"><span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800">{txn.mode}</span></td>
                                                     <td className={`px-6 py-4 whitespace-nowrap text-right text-sm font-bold ${txn.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>{txn.type === 'credit' ? '+' : '-'} {formatCurrency(txn.amount)}</td>
                                                 </tr>
@@ -442,13 +361,6 @@ Here is the **100% corrected code**. It includes:
                             </div>
                         </div>
                     </main>
-
-                    <footer className="bg-white border-t mt-auto py-6">
-                        <div className="max-w-7xl mx-auto px-4 text-center">
-                            <p className="text-slate-500 text-sm mb-2">&copy; 2025 Track Your Expense. All Rights Reserved.</p>
-                            <p className="text-slate-400 text-xs font-mono">Developed by Bhavishya Gupta <span className="mx-2">|</span> <a href="mailto:bhavishyagupta22@gmail.com" className="hover:text-indigo-500 transition">bhavishyagupta22@gmail.com</a></p>
-                        </div>
-                    </footer>
 
                     {isModalOpen && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
@@ -487,15 +399,13 @@ Here is the **100% corrected code**. It includes:
             );
         };
 
-        // --- MAIN APP (CHANGE 3: PERSISTENT AUTH) ---
+        // --- MAIN APP ---
         const App = () => {
             const [user, setUser] = useState(null);
             const [profile, setProfile] = useState(null);
             const [loading, setLoading] = useState(true);
 
             useEffect(() => {
-                // This is the critical part: We listen to Firebase to tell us if 
-                // the user is logged in or not, and it handles page refreshes automatically.
                 const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
                     if (firebaseUser) {
                         const userData = {
@@ -504,25 +414,19 @@ Here is the **100% corrected code**. It includes:
                             photoURL: firebaseUser.photoURL
                         };
                         setUser(userData);
-                        // Try to load their profile from LocalStorage if they've been here before
                         const savedProfile = localStorage.getItem(`profile_${firebaseUser.email}`);
-                        if (savedProfile) {
-                            setProfile(JSON.parse(savedProfile));
-                        }
+                        if (savedProfile) setProfile(JSON.parse(savedProfile));
                     } else {
                         setUser(null);
                         setProfile(null);
                     }
                     setLoading(false);
                 });
-
-                // Cleanup listener on unmount
                 return () => unsubscribe();
             }, []);
 
             const handleOnboardingComplete = (details) => {
                 setProfile(details);
-                // Save profile permanently linked to this specific email
                 localStorage.setItem(`profile_${user.email}`, JSON.stringify(details));
             };
 
@@ -544,14 +448,13 @@ Here is the **100% corrected code**. It includes:
         root.render(<App />);
     </script>
     <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((reg) => console.log('Service Worker Registered!', reg.scope))
-        .catch((err) => console.log('Service Worker Failed:', err));
-    });
-  }
-</script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+          } 
+        });
+      }
+    </script>
 </body>
 </html>
-```
