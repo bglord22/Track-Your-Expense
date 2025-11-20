@@ -1,7 +1,7 @@
 {
   "name": "Track Your Expense",
   "short_name": "Expense Tracker",
-  "start_url": "/index.html",
+  "start_url": "https://bglord22.github.io/Track-Your-Expense/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
