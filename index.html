@@ -80,28 +80,16 @@
 
         // --- COMPONENTS ---
 
-        // 1. Login Component (CHANGE 2: REAL LOGIN LOGIC)
-        const Login = ({ onLogin }) => {
-            const handleGoogleLogin = () => {
-                // Using the global 'auth' and 'provider' variables we set up in <head>
-                auth.signInWithPopup(provider)
-                    .then((result) => {
-                        // Successful login!
-                        // Note: The main App component handles the state update via onAuthStateChanged
-                        // But we can trigger a manual update here just in case
-                        const user = result.user;
-                        const userData = {
-                            displayName: user.displayName,
-                            email: user.email,
-                            photoURL: user.photoURL
-                        };
-                        // No need to call onLogin manually if using onAuthStateChanged listener, 
-                        // but it acts as a fallback.
-                    })
-                    .catch((error) => {
-                        console.error("Error signing in", error);
-                        alert("Login failed: " + error.message);
-                    });
+         const Login = () => {
+            const handleLogin = async () => {
+                try {
+                    // *** THIS IS THE CRUCIAL CHANGE ***
+                    // signInWithPopup works reliably inside the Android App WebView
+                    await auth.signInWithPopup(provider); 
+                } catch (error) {
+                    console.error("Login Failed:", error);
+                    alert("Login failed. Please try again.");
+                }
             };
 
             return (
@@ -545,3 +533,4 @@
 </body>
 
 </html>
+
